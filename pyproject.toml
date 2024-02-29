@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "fizzysearch"
+version = "0.1"
+description = "A SPARQL rewriter that performs enhanced searches"
+homepage = "https://github.com/ISE-FIZKarlsruhe/fizzysearch"
+license = "MIT"
+authors = ["Etienne Posthumus <ep@epoz.org>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.7"
