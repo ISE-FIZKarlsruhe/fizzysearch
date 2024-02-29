@@ -9,3 +9,9 @@ One of the benefits are enabling easier searches for existing triplestires in wh
 ✨ This library gives you ["fizzy"](https://en.wiktionary.org/wiki/fizzy) searches! ✨
 
 (and it was made by the [FIZ ISE](https://www.fiz-karlsruhe.de/en/forschung/information-service-engineering) group)
+
+## TODO
+
+- [ ] Add a sample FTS implementation as demo
+
+- [ ] Add documentation onm how to build the dependencies and where to fetch the SPARQL grammar
