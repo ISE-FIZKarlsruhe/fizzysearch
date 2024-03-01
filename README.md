@@ -34,4 +34,4 @@ This demo is from [SHMARQL](https://github.com/epoz/shmarql) which uses FIZzysea
 
 - [ ] Add a sample FTS implementation as demo
 
-- [ ] Add documentation onm how to build the dependencies and where to fetch the SPARQL grammar
+- [ ] Add documentation on how to build the dependencies and where to fetch the SPARQL grammar
