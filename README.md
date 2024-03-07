@@ -15,7 +15,7 @@ One of the benefits are enabling easier searches for existing triplestires in wh
 See it in action by running this command in a terminal:
 
 ```shell
-docker run --rm -it -p 8000:8000 -it -e FTS_FILEPATH=/fts -e DATA_LOAD_PATHS=https://yogaontology.org/ontology.ttl ghcr.io/epoz/shmarql:latest
+docker run --rm -it -p 8000:8000 -e FTS_FILEPATH=/fts -e DATA_LOAD_PATHS=https://yogaontology.org/ontology.ttl ghcr.io/epoz/shmarql:latest
 ```
 
 This will load up a triplestore with an example ontology, and allow fulltext searches over the literals in that store.
