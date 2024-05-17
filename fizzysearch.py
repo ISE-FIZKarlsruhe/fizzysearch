@@ -35,7 +35,9 @@ def rewrite(query: str) -> str:
         if name == "tss":
             if start_byte > 0 and end_byte > start_byte:
                 if var_name is not None and q_object is not None and found:
-                    found_vars.append((start_byte, end_byte, var_name, q_object))
+                    found_vars.append(
+                        (start_byte, end_byte, var_name, q_object, predicate)
+                    )
             start_byte = n.start_byte
             end_byte = n.end_byte
             var_name = q_object = None
