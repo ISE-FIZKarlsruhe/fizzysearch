@@ -10,12 +10,6 @@ PARSER = Parser()
 PARSER.set_language(SPARQL)
 
 PREDICATE_MAP = {}
-COMMENTS_CALLABLES = []
-
-
-def comments(listener: callable) -> None:
-    if listener not in COMMENTS_CALLABLES:
-        COMMENTS_CALLABLES.append(listener)
 
 
 def register(predicates: list[str], replacer: callable) -> None:
@@ -28,13 +22,17 @@ def register(predicates: list[str], replacer: callable) -> None:
 
 
 def rewrite(query: str) -> str:
+    return rewrite_extended(query).get("rewritten")
+
+
+def rewrite_extended(query: str) -> dict:
+    result = {"query": query, "rewritten": query, "comments": []}
     tree = PARSER.parse(query.encode("utf8"))
 
     # Call the comments listeners
     comment_q = SPARQL.query("(comment) @comment")
     for n, name in comment_q.captures(tree.root_node):
-        for listener in COMMENTS_CALLABLES:
-            listener(n.text.decode("utf8"))
+        result["comments"].append(n.text.decode("utf8").strip("# "))
 
     q = SPARQL.query(
         """((triples_same_subject (var) @var (property_list (property (path_element (iri_reference) @predicate) (object_list [(rdf_literal) @q_object_literal (iri_reference) @q_object_iri])))) @tss (".")* @tss_dot )"""
@@ -96,5 +94,6 @@ def rewrite(query: str) -> str:
                 newq.append(chr(c))
             i += 1
         newq = "".join(newq)
-        query = newq
-    return query
+        result["rewritten"] = newq
+
+    return result

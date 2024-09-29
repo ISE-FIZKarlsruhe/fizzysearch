@@ -1,4 +1,4 @@
-from fizzysearch import register, rewrite, comments
+from fizzysearch import register, rewrite, rewrite_extended
 
 
 def test_rewrite_simple():
@@ -16,18 +16,12 @@ def test_rewrite_simple():
     assert rewritten_query == expected_query
 
 
-def test_comment_caller():
-    found = set()
-
-    comments(lambda x: found.add(x))
-    comments(lambda x: found.add(x.lower().replace(" ", "_")))
-
+def test_comments():
     query = '# This is a comment\nSELECT ?var WHERE { ?var <http://fizzy/simple> "something" . }'
-    rewritten_query = rewrite(query)
-    assert "# This is a comment" in found
-    assert "#_this_is_a_comment" in found
+    rewritten_query = rewrite_extended(query)
+    assert "This is a comment" in rewritten_query["comments"]
 
 
 if __name__ == "__main__":
     test_rewrite_simple()
-    test_comment_caller()
+    test_comments()
