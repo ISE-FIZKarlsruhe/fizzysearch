@@ -1,4 +1,4 @@
-import sys, gzip, sqlite3, logging
+import os, sys, gzip, sqlite3, logging, argparse
 from tree_sitter import Language, Parser
 from typing import Union
 
@@ -220,3 +220,23 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
         result["rewritten"] = newq
 
     return result
+
+
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument(
+        "fts_sqlite_path",
+        help="The path to the sqlite file that will be created with the FTS data",
+    )
+    argparser.add_argument(
+        "triplefiles",
+        help="The path to scan for n-triple files to index",
+    )
+    args = argparser.parse_args()
+
+    filenames = [
+        os.path.join(args.triplefiles, filename)
+        for filename in os.listdir(args.triplefiles)
+        if filename.endswith(".nt") or filename.endswith(".nt.gz")
+    ]
+    build_fts_index(filenames, args.fts_sqlite_path)
