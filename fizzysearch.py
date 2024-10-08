@@ -154,7 +154,7 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
         result["comments"].append(n.text.decode("utf8").strip("# "))
 
     q = SPARQL.query(
-        """((triples_same_subject (var) @var (property_list (property (path_element (iri_reference) @predicate) (object_list [(rdf_literal) @q_object_literal (iri_reference) @q_object_iri])))) @tss (".")* @tss_dot )"""
+        """((triples_same_subject (var) @var (property_list (property (path_element [(iri_reference) @predicate (prefixed_name) @predicate_prefix]) (object_list [(rdf_literal) @q_object_literal (iri_reference) @q_object_iri])))) @tss (".")* @tss_dot )"""
     )
     found_vars = []
     found = False
@@ -174,7 +174,7 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
             found = False
         if name in ("q_object_literal", "q_object_iri"):
             q_object = n.text.decode("utf8")
-        if name == "predicate":
+        if name in ("predicate", "predicate_prefix"):
             bare = n.text.decode("utf8").strip("<>")
             if bare in predicate_map:
                 predicate = bare
