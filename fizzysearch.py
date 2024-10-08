@@ -129,22 +129,26 @@ def search_fts(
     literal_value, language, datatype = literal_to_parts(literal)
     if not literal_value:
         return []
-    if use_language:
-        return [
-            row[0]
-            for row in db.execute(
-                f"SELECT distinct subject FROM literal_index WHERE object match ? and language = ?  order by rank limit {limit}",
-                (literal_value, language),
-            )
-        ]
-    else:
-        return [
-            row[0]
-            for row in db.execute(
-                f"SELECT distinct subject FROM literal_index WHERE object match ? order by rank limit {limit}",
-                (literal_value,),
-            )
-        ]
+    try:
+        if use_language:
+            return [
+                row[0]
+                for row in db.execute(
+                    f"SELECT distinct subject FROM literal_index WHERE object match ? and language = ?  order by rank limit {limit}",
+                    (literal_value, language),
+                )
+            ]
+        else:
+            return [
+                row[0]
+                for row in db.execute(
+                    f"SELECT distinct subject FROM literal_index WHERE object match ? order by rank limit {limit}",
+                    (literal_value,),
+                )
+            ]
+    except:
+        logging.exception("Error in search_fts: " + literal)
+        return []
 
 
 def rewrite(query: str, predicate_map: dict = dict()) -> dict:
