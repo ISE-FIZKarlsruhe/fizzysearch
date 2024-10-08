@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fizzysearch"
-version = "0.8"
+version = "0.9"
 description = "A SPARQL rewriter that performs enhanced searches"
 homepage = "https://github.com/ISE-FIZKarlsruhe/fizzysearch"
 repository = "https://github.com/ISE-FIZKarlsruhe/fizzysearch"
