@@ -113,12 +113,17 @@ def build_fts_index(
         logging.debug(f"Building FTS index done")
 
 
-def use_fts(fts_filepath: Union[str, sqlite3.Connection], use_language=False):
+def use_fts(
+    fts_filepath: Union[str, sqlite3.Connection], use_language=False, limit=999
+):
     return lambda x: search_fts(fts_filepath, x, use_language)
 
 
 def search_fts(
-    fts_index: Union[str, sqlite3.Connection], literal: str, use_language=False
+    fts_index: Union[str, sqlite3.Connection],
+    literal: str,
+    use_language=False,
+    limit=999,
 ):
     db = get_db(fts_index)
     literal_value, language, datatype = literal_to_parts(literal)
@@ -128,7 +133,7 @@ def search_fts(
         return [
             row[0]
             for row in db.execute(
-                "SELECT distinct subject FROM literal_index WHERE object match ? and language = ?",
+                f"SELECT distinct subject FROM literal_index WHERE object match ? and language = ?  order by rank limit {limit}",
                 (literal_value, language),
             )
         ]
@@ -136,7 +141,7 @@ def search_fts(
         return [
             row[0]
             for row in db.execute(
-                "SELECT distinct subject FROM literal_index WHERE object match ?",
+                f"SELECT distinct subject FROM literal_index WHERE object match ? order by rank limit {limit}",
                 (literal_value,),
             )
         ]
