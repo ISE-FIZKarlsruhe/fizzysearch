@@ -92,11 +92,14 @@ def build_fts_index(
 def use_fts(
     fts_filepath: Union[str, sqlite3.Connection], use_language=False, limit=999
 ):
-    return lambda x: search_fts(fts_filepath, x, use_language, limit)
+    return lambda varname, value: search_fts(
+        fts_filepath, varname, value, use_language, limit
+    )
 
 
 def search_fts(
     fts_index: Union[str, sqlite3.Connection],
+    varname: str,
     literal: str,
     use_language=False,
     limit=999,
@@ -104,27 +107,30 @@ def search_fts(
     db = get_db(fts_index)
     literal_value, language, datatype = literal_to_parts(literal)
     if not literal_value:
-        return []
+        return {}
 
     def doit(q):
         if use_language:
-            theq = f"SELECT distinct subject FROM literal_index WHERE object match ? and language = ? order by rank limit {limit}"
+            theq = f"SELECT distinct subject, object FROM literal_index WHERE object match ? and language = ? order by rank limit {limit}"
             params = (q, language)
         else:
-            theq = f"SELECT distinct subject FROM literal_index WHERE object match ? order by rank limit {limit}"
+            theq = f"SELECT distinct subject, object FROM literal_index WHERE object match ? order by rank limit {limit}"
 
             params = (q,)
-        return [row[0] for row in db.execute(theq, params)]
+        return [(subject, object) for subject, object in db.execute(theq, params)]
 
     try:
-        return doit(literal_value)
+        return {"results": doit(literal_value), "vars": (varname, varname + "Literal")}
     except sqlite3.OperationalError as soe:
         if str(soe).find("no such column") > -1:
             try:
-                return doit(f'"{literal_value}"')
+                return {
+                    "results": doit(f'"{literal_value}"'),
+                    "vars": (varname, varname + "Literal"),
+                }
             except:
                 logging.exception("Error in search_fts: " + literal)
     except:
         logging.exception("Error in search_fts: " + literal)
 
-    return []
+    return {}

@@ -86,17 +86,22 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
                     in_found = True
                     tocall = predicate_map.get(predicate)
                     if tocall:
-                        results = tocall(q_object)
-                        results = " ".join(
-                            [
-                                result
-                                for result in results
-                                if not result.startswith("_:")
-                            ]
+                        output = tocall(var_name, q_object)
+                        results = []
+                        for line in output.get("results", []):
+                            lline = " ".join(
+                                [l for l in line if not l.startswith("_:")]
+                            )
+                            results.append(f"({lline})")
+                        results = (
+                            "VALUES ("
+                            + " ".join([var for var in output.get("vars", [])])
+                            + ")\n{"
+                            + "\n".join(results)
+                            + "\n}"
                         )
-                        if results:
-                            for cc in f"VALUES {var_name} {{{results}}}":
-                                newq.append(cc)
+                        for cc in results:
+                            newq.append(cc)
                         i = end_byte
             if not in_found:
                 newq.append(chr(c))

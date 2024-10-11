@@ -1,9 +1,6 @@
 import logging, sqlite3, gzip
-import igraph as ig
-import gensim
 import voyager
 import numpy as np
-import xxhash
 
 
 class StringParamException(Exception):
@@ -15,6 +12,10 @@ def build_rdf2vec_index(
     rdf2vec_index_path: str,
     input_is_unicode_escaped: bool = False,
 ):
+    import igraph as ig
+    import gensim
+    import xxhash
+
     if not type(triplefile_paths) == list:
         raise StringParamException(
             "triplefile_paths must be a list of paths to n-triple files"
@@ -116,12 +117,12 @@ CREATE INDEX IF NOT EXISTS rdf2vec_index_uri ON rdf2vec_index (uri);
 
 
 def use_rdf2vec(rdf2vec_index: str, limit: int = 20):
-    return lambda x: search_rdf2vec(rdf2vec_index, x, limit)
+    return lambda varname, value: search_rdf2vec(rdf2vec_index, varname, value, limit)
 
 
-def search_rdf2vec(rdf2vec_index: str, node_uri: str, limit: int = 20):
+def search_rdf2vec(rdf2vec_index: str, varname: str, node_uri: str, limit: int = 20):
     if not rdf2vec_index or not node_uri:
-        return []
+        return {}
 
     node_uri = node_uri.strip("<>")
 
@@ -133,7 +134,7 @@ def search_rdf2vec(rdf2vec_index: str, node_uri: str, limit: int = 20):
         vector = np.frombuffer(row[0], dtype=np.float32)
         found = True
     if not found:
-        return []
+        return {}
 
     index = voyager.Index.load(rdf2vec_index)
     ids, distances = index.query(vector, limit)
@@ -149,6 +150,8 @@ def search_rdf2vec(rdf2vec_index: str, node_uri: str, limit: int = 20):
         [(val["distance"], val["uri"]) for val in result_dict.values()]
     )
 
-    results = [f"<{uri}>" for _, uri in sorted_results]
+    results = [
+        (f"<{uri}>", f'"{distance}"^^xsd:decimal') for distance, uri in sorted_results
+    ]
     logging.debug(f"RDF2Vec search for {node_uri} found {len(results)}")
-    return results
+    return {"results": results, "vars": (varname, varname + "Score")}

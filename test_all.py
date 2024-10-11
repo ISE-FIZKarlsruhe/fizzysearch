@@ -16,7 +16,7 @@ def test_rewrite_prefix(testdb):
     query = """PREFIX fizzy: <https://fizzysearch.ise.fiz-karlsruhe.de/>
 
 select * where { ?s fizzy:fts "PizzaComQueijo" . } limit 10"""
-    expected_query = "PREFIX fizzy: <https://fizzysearch.ise.fiz-karlsruhe.de/>\n\nselect * where { VALUES ?s {<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza>}} limit 10"
+    expected_query = "PREFIX fizzy: <https://fizzysearch.ise.fiz-karlsruhe.de/>\n\nselect * where { VALUES (?s ?sLiteral)\n{(<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza> PizzaComQueijo)\n}} limit 10"
 
     rewritten_query = fizzysearch.rewrite(query, {"fizzy:fts": use_fts(testdb)}).get(
         "rewritten"
@@ -28,7 +28,7 @@ select * where { ?s fizzy:fts "PizzaComQueijo" . } limit 10"""
 def test_no_dot(testdb):
     query = 'select ?s where {?s <https://fizzysearch.ise.fiz-karlsruhe.de/fts> "PizzaComQueijo"} limit 10'
     # query = 'select ?s where {?s <https://fizzysearch.ise.fiz-karlsruhe.de/fts> "pizza"} limit 10'
-    expected_query = "select ?s where {VALUES ?s {<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza>}} limit 10"
+    expected_query = "select ?s where {VALUES (?s ?sLiteral)\n{(<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza> PizzaComQueijo)\n} limit 10"
     rewritten_query = fizzysearch.rewrite(
         query, {"https://fizzysearch.ise.fiz-karlsruhe.de/fts": use_fts(testdb)}
     ).get("rewritten")
@@ -38,9 +38,7 @@ def test_no_dot(testdb):
 
 def test_fts_with_hyphens(testdb):
     query = 'SELECT ?var WHERE { ?var <https://fizzysearch.ise.fiz-karlsruhe.de/fts> "date-independent" . }'
-    expected_query = (
-        "SELECT ?var WHERE { VALUES ?var {<http://www.co-ode.org/ontologies/pizza>}}"
-    )
+    expected_query = "SELECT ?var WHERE { VALUES (?var ?varLiteral)\n{(<http://www.co-ode.org/ontologies/pizza> v2.0 Added new annotations to the ontology using standard/well-know annotation properties\\n\\nv1.5. Removed protege.owl import and references. Made ontology URI date-independent\\n\\nv1.4. Added Food class (used in domain/range of hasIngredient), Added several hasCountryOfOrigin restrictions on pizzas, Made hasTopping invers functional)\n}}"
     rewritten_query = fizzysearch.rewrite(
         query, {"https://fizzysearch.ise.fiz-karlsruhe.de/fts": use_fts(testdb)}
     ).get("rewritten")
@@ -50,7 +48,7 @@ def test_fts_with_hyphens(testdb):
 
 def test_rewrite_simple(testdb):
     query = 'SELECT ?var WHERE { ?var <https://fizzysearch.ise.fiz-karlsruhe.de/fts> "PizzaComQueijo" . }'
-    expected_query = "SELECT ?var WHERE { VALUES ?var {<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza>}}"
+    expected_query = "SELECT ?var WHERE { VALUES (?var ?varLiteral)\n{(<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza> PizzaComQueijo)\n}}"
     rewritten_query = fizzysearch.rewrite(
         query, {"https://fizzysearch.ise.fiz-karlsruhe.de/fts": use_fts(testdb)}
     ).get("rewritten")
@@ -60,7 +58,7 @@ def test_rewrite_simple(testdb):
 
 def test_rewrite_language(testdb):
     query = 'SELECT ?var WHERE { ?var <https://fizzysearch.ise.fiz-karlsruhe.de/fts_language> "PizzaComQueijo"@pt . }'
-    expected_query = "SELECT ?var WHERE { VALUES ?var {<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza>}}"
+    expected_query = "SELECT ?var WHERE { VALUES (?var ?varLiteral)\n{(<http://www.co-ode.org/ontologies/pizza/pizza.owl#CheeseyPizza> PizzaComQueijo)\n}}"
     rewritten_query = fizzysearch.rewrite(
         query,
         {
@@ -73,7 +71,7 @@ def test_rewrite_language(testdb):
     assert rewritten_query == expected_query
 
     query = 'SELECT ?var WHERE { ?var <https://fizzysearch.ise.fiz-karlsruhe.de/fts_language> "PizzaComQueijo"@gr . }'
-    expected_query = "SELECT ?var WHERE { }"
+    expected_query = "SELECT ?var WHERE { VALUES (?var ?varLiteral)\n{\n}}"
     rewritten_query = fizzysearch.rewrite(
         query,
         {
