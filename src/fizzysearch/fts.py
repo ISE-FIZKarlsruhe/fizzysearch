@@ -1,6 +1,7 @@
 import os, sys, gzip, sqlite3, logging, argparse
 from typing import Union
 from .rewriting import literal_to_parts
+from .reader import read_nt
 
 
 DB_SCHEMA = """
@@ -32,61 +33,24 @@ class StringParamException(Exception):
 
 
 def build_fts_index(
-    triplefile_paths: list,
-    fts_index: Union[str, sqlite3.Connection],
-    input_is_unicode_escaped: bool = False,
+    triplefile_paths: list, index_db_path: Union[str, sqlite3.Connection]
 ):
-    """
-    Iterate over the triplefile_paths list of n-triple files, and index the literals
-    Note: In some older datasets the input might not be UTF8, but be unicode-escaped.
-    This means a chars look like mi\u00EBs instead of miës. If this is the case, set input_is_unicode_escaped to True.
-    And then we need to open the files a binary and do .decode('unicode_escape')
+    db = get_db(index_db_path)
+    logging.debug(f"Building FTS index with {triplefile_paths} in {index_db_path}")
 
-    """
-    if not type(triplefile_paths) == list:
-        raise StringParamException(
-            "triplefile_paths must be a list of paths to n-triple files"
-        )
+    for s, p, o in read_nt(triplefile_paths):
+        # TODO - add support for blank nodes
+        # How? We will need to back-reference any blanknodes to their referred subjects... :-(
 
-    db = get_db(fts_index)
-    logging.debug(f"Building FTS index with {triplefile_paths} in {fts_index}")
+        literal_value, language, datatype = literal_to_parts(o)
 
-    for triplefile_path in triplefile_paths:
-        if triplefile_path.endswith(".gz"):
-            thefile = gzip.open(triplefile_path, "rb")
-        else:
-            thefile = open(triplefile_path, "rb")
-        for line in thefile:
-            if input_is_unicode_escaped:
-                line = line.decode("unicode_escape")
-            else:
-                line = line.decode("utf8")
-            line = line.strip()
-            if not line.endswith(" ."):
-                continue
-            line = line[:-2]
-            parts = line.split(" ")
-            if len(parts) > 2:
-                o = " ".join(parts[2:])
-                s = parts[0]
-                p = parts[1]
-
-            if not (s.startswith("<") and s.endswith(">")):
-                continue
-            if not (p.startswith("<") and p.endswith(">")):
-                continue
-            # TODO - add support for blank nodes
-            # How? We will need to back-reference any blanknodes to their referred subjects... :-(
-
-            literal_value, language, datatype = literal_to_parts(o)
-
-            if literal_value:
-                db.execute(
-                    "INSERT INTO literal_index (subject, predicate, object, language, datatype) VALUES (?, ?, ?, ?, ?)",
-                    (s, p, literal_value, language, datatype),
-                )
-        db.commit()
-        logging.debug(f"Building FTS index done")
+        if literal_value:
+            db.execute(
+                "INSERT INTO literal_index (subject, predicate, object, language, datatype) VALUES (?, ?, ?, ?, ?)",
+                (s, p, literal_value, language, datatype),
+            )
+    db.commit()
+    logging.debug(f"Building FTS index done")
 
 
 def use_fts(
@@ -109,28 +73,44 @@ def search_fts(
     if not literal_value:
         return {}
 
-    def doit(q):
+    def doit(q, language):
         if use_language:
-            theq = f"SELECT distinct subject, object FROM literal_index WHERE object match ? and language = ? order by rank limit {limit}"
+            theq = f"SELECT distinct subject, object, language, rank FROM literal_index WHERE object match ? and language = ? order by rank limit {limit}"
             params = (q, language)
         else:
-            theq = f"SELECT distinct subject, object FROM literal_index WHERE object match ? order by rank limit {limit}"
+            theq = f"SELECT distinct subject, object, language, rank FROM literal_index WHERE object match ? order by rank limit {limit}"
 
             params = (q,)
-        return [(subject, object) for subject, object in db.execute(theq, params)]
+
+        back = []
+        for subject, object, o_language, rank in db.execute(theq, params):
+            object = object.encode("utf8").decode("unicode_escape")
+            object = object.replace('"', '\\"').replace("\n", "\\n")
+            if len(object) > 999:
+                object = object[:999] + "..."
+            if o_language:
+                back.append(
+                    (subject, f'"{object}"@{o_language}', f'"{rank}"^^xsd:decimal')
+                )
+            else:
+                back.append((subject, f'"{object}"' f'"{rank}"^^xsd:decimal'))
+        return back
 
     try:
-        return {"results": doit(literal_value), "vars": (varname, varname + "Literal")}
+        return {
+            "results": doit(literal_value, language),
+            "vars": (varname, varname + "Literal", varname + "Rank"),
+        }
     except sqlite3.OperationalError as soe:
         if str(soe).find("no such column") > -1:
             try:
                 return {
-                    "results": doit(f'"{literal_value}"'),
+                    "results": doit(f'"{literal_value}"', language),
                     "vars": (varname, varname + "Literal"),
                 }
-            except:
+            except Exception as e:
                 logging.exception("Error in search_fts: " + literal)
-    except:
+    except Exception as e:
         logging.exception("Error in search_fts: " + literal)
 
     return {}

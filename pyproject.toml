@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fizzysearch"
-version = "0.14"
+version = "0.22"
 description = "A SPARQL rewriter that performs enhanced searches"
 authors = ["Etienne Posthumus <ep@epoz.org>"]
 license = "MIT"
@@ -13,7 +13,7 @@ keywords = ["SPARQL", "search", "RDF", "Linked Data"]
 python = "^3.10"
 tree-sitter = "0.20.1"
 igraph = "0.10.4"
-numpy = "1.22.4"
+numpy = "1.26.4"
 voyager = "2.0.6"
 gensim = "4.3.2"
 scipy = "1.10.1"

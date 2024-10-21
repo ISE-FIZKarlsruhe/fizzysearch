@@ -1,67 +1,38 @@
 import logging, sqlite3, gzip
 import voyager
 import numpy as np
+from .reader import read_nt
 
 
 class StringParamException(Exception):
     pass
 
 
-def build_rdf2vec_index(
-    triplefile_paths: list,
-    rdf2vec_index_path: str,
-    input_is_unicode_escaped: bool = False,
-):
+def build_rdf2vec_index(triplefile_paths: list, rdf2vec_index_path: str):
+    # The imports are inside the building method so we can exclude these libraries at runtime
+    # if we only want to use the index not build it.
     import igraph as ig
     import gensim
     import xxhash
-
-    if not type(triplefile_paths) == list:
-        raise StringParamException(
-            "triplefile_paths must be a list of paths to n-triple files"
-        )
 
     logging.debug("RDF2Vec init: now creating nodemap and edgemap")
     nodes = {}
     as_ints = []
     only_subjects = set()
-    for triplefile_path in triplefile_paths:
-        if triplefile_path.endswith(".gz"):
-            thefile = gzip.open(triplefile_path, "rb")
-        else:
-            thefile = open(triplefile_path, "rb")
-        for line in thefile:
-            if input_is_unicode_escaped:
-                line = line.decode("unicode_escape")
-            else:
-                line = line.decode("utf8")
-            line = line.strip()
-            if not line.endswith(" ."):
-                continue
-            line = line[:-2]
-            parts = line.split(" ")
-            if len(parts) > 2:
-                o = " ".join(parts[2:])
-                s = parts[0]
-                p = parts[1]
+    for s, p, o in read_nt(triplefile_paths):
+        s = s.strip("<>")
+        p = p.strip("<>")
+        o = o.strip("<>")  # and literals just remain as they are
+        ss = xxhash.xxh64(s).intdigest()
+        pp = xxhash.xxh64(p).intdigest()
+        oo = xxhash.xxh64(o).intdigest()
+        nodes[ss] = s
+        nodes[oo] = o
+        nodes[pp] = p
+        # we are also just sticking the predicates in as nodes, but they are not used for walks
 
-            if not (s.startswith("<") and s.endswith(">")):
-                continue
-            if not (p.startswith("<") and p.endswith(">")):
-                continue
-            s = s.strip("<>")
-            p = p.strip("<>")
-            o = o.strip("<>")  # and literals just remain as they are
-            ss = xxhash.xxh64(s).intdigest()
-            pp = xxhash.xxh64(p).intdigest()
-            oo = xxhash.xxh64(o).intdigest()
-            nodes[ss] = s
-            nodes[oo] = o
-            nodes[pp] = p
-            # we are also just sticking the predicates in as nodes, but they are not used for walks
-
-            as_ints.append((ss, pp, oo))
-            only_subjects.add(ss)
+        as_ints.append((ss, pp, oo))
+        only_subjects.add(ss)
 
     # Make as_ints unique
     as_ints = list(sorted(set(as_ints)))
