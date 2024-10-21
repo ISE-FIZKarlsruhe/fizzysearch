@@ -8,7 +8,6 @@ theme:
     - toc.follow
     - navigation.top
     - header.autohide
-  logo: assets/logo-fiz-karlsruhe-en-claim.svg
   palette:
     # Palette toggle for light mode
     - scheme: default
