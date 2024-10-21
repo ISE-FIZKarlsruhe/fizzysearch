@@ -30,3 +30,5 @@ If all goes well, this should read your file named foobar.nt, index it, and stor
 !!! note
 
     Running on the command line will 'walk' the entire current directory, and all sub-directories if you do not explicitly specify a path. So if you have many .nt files in the current directory, it will try to index them all!
+
+Now that you have a fulltext index for your n-triple file, you could use it in a system like <a href="https://shmarql.com/">SHMARQL</a> to query the file easily.
