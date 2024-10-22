@@ -70,7 +70,7 @@ Now we can generate an index over all those files by running the command:
 BLOOMTYPER_INDEX_PATH=gnd.bloomtyper python3 -m fizzysearch
 ```
 
-This will take some time, as those are quite a number of triples. Once this process is comeplete we can use the generated index from Python like this:
+This will take some time, as those are quite a number of triples. Once this process is complete we can use the generated index from Python like this:
 
 ```python
 >>> from fizzysearch.bloommtyper import Checker
@@ -78,3 +78,5 @@ This will take some time, as those are quite a number of triples. Once this proc
 >>> c('https://d-nb.info/gnd/187-9')
 ['https://d-nb.info/standards/elementset/gnd#SeriesOfConferenceOrEvent']
 ```
+
+The generated bloomtyper index file is only circa 41MB in size, which is tiny - and fast to use - compared to the gigabytes of compressed triples it indexes.
