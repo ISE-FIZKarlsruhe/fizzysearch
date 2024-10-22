@@ -79,4 +79,71 @@ This will take some time, as those are quite a number of triples. Once this proc
 ['https://d-nb.info/standards/elementset/gnd#SeriesOfConferenceOrEvent']
 ```
 
-The generated bloomtyper index file is only circa 41MB in size, which is tiny - and fast to use - compared to the gigabytes of compressed triples it indexes.
+The generated bloomtyper index file is only circa 52MB in size, which is tiny - and fast to use - compared to the gigabytes of compressed triples it indexes.
+
+We can also see the resulting map of types from the GND, and their counts:
+
+```python
+for x, y in c:
+    print(x,y)
+http://purl.org/ontology/bibo/Document 12513177
+https://d-nb.info/standards/elementset/gnd#DifferentiatedPerson 6146309
+http://purl.org/ontology/bibo/Article 2482466
+http://purl.org/ontology/bibo/Issue 2364907
+http://purl.org/ontology/bibo/Periodical 1828449
+https://d-nb.info/standards/elementset/gnd#CorporateBody 1293126
+https://d-nb.info/standards/elementset/gnd#ConferenceOrEvent 775826
+https://schema.org/SheetMusic 480217
+http://purl.org/ontology/bibo/Collection 430021
+http://purl.org/ontology/bibo/Series 344288
+https://d-nb.info/standards/elementset/gnd#MusicalWork 292711
+http://purl.org/ontology/bibo/Map 292002
+https://d-nb.info/standards/elementset/gnd#Work 227514
+https://d-nb.info/standards/elementset/gnd#TerritorialCorporateBodyOrAdministrativeUnit 191321
+https://d-nb.info/standards/elementset/gnd#SubjectHeadingSensoStricto 127251
+https://d-nb.info/standards/elementset/gnd#OrganOfCorporateBody 112424
+https://d-nb.info/standards/elementset/gnd#SeriesOfConferenceOrEvent 111320
+https://d-nb.info/standards/elementset/gnd#BuildingOrMemorial 76206
+https://d-nb.info/standards/elementset/gnd#Company 54418
+https://d-nb.info/standards/elementset/gnd#MusicalCorporateBody 52438
+https://d-nb.info/standards/elementset/gnd#NomenclatureInBiologyOrChemistry 33330
+https://d-nb.info/standards/elementset/gnd#PlaceOrGeographicName 29887
+https://d-nb.info/standards/elementset/gnd#NaturalGeographicUnit 22983
+https://d-nb.info/standards/elementset/gnd#ReligiousCorporateBody 22180
+https://d-nb.info/standards/elementset/gnd#Family 21654
+http://xmlns.com/foaf/0.1/Organization 20956
+https://d-nb.info/standards/elementset/gnd#AdministrativeUnit 14011
+http://purl.org/ontology/bibo/AudioVisualDocument 10573
+https://d-nb.info/standards/elementset/gnd#SoftwareProduct 8531
+https://d-nb.info/standards/elementset/gnd#SubjectHeading 8221
+https://d-nb.info/standards/elementset/gnd#ProvenanceCharacteristic 8147
+https://d-nb.info/standards/elementset/gnd#ProductNameOrBrandName 7767
+http://purl.org/dc/dcmitype/Service 7749
+https://d-nb.info/standards/elementset/gnd#Manuscript 6912
+"http://www.w3.org/2006/vcard/ns#Pref"^^<http://www.w3.org/2001/XMLSchema#string 6142
+https://d-nb.info/standards/elementset/gnd#Language 6139
+http://purl.org/library/BrailleBook 5853
+https://d-nb.info/standards/elementset/gnd#Expression 5586
+https://d-nb.info/standards/elementset/gnd#WayBorderOrLine 5382
+https://d-nb.info/standards/elementset/gnd#ReligiousAdministrativeUnit 4929
+https://d-nb.info/standards/elementset/gnd#HistoricSingleEventOrEra 4911
+https://d-nb.info/standards/elementset/gnd#EthnographicName 4528
+https://d-nb.info/standards/elementset/gnd#RoyalOrMemberOfARoyalHouse 4177
+https://d-nb.info/standards/elementset/gnd#ProjectOrProgram 3672
+https://d-nb.info/standards/elementset/gnd#CharactersOrMorphemes 3206
+https://d-nb.info/standards/elementset/gnd#VersionOfAMusicalWork 2913
+https://d-nb.info/standards/elementset/gnd#ReligiousTerritory 2662
+https://d-nb.info/standards/elementset/gnd#NameOfSmallGeographicUnitLyingWithinAnotherGeographicUnit 2451
+https://d-nb.info/standards/elementset/gnd#Collection 1775
+https://d-nb.info/standards/elementset/gnd#LiteraryOrLegendaryCharacter 1604
+https://d-nb.info/standards/elementset/gnd#MeansOfTransportWithIndividualName 1517
+https://d-nb.info/standards/elementset/gnd#GroupOfPersons 950
+https://d-nb.info/standards/elementset/gnd#CollectivePseudonym 924
+https://d-nb.info/standards/elementset/gnd#Gods 692
+https://d-nb.info/standards/elementset/gnd#MemberState 521
+https://d-nb.info/standards/elementset/gnd#ExtraterrestrialTerritory 314
+https://d-nb.info/standards/elementset/gnd#Country 306
+https://d-nb.info/standards/elementset/gnd#Spirits 121
+https://d-nb.info/standards/elementset/gnd#FictivePlace 44
+https://d-nb.info/standards/elementset/gnd#FictiveCorporateBody 33
+```
