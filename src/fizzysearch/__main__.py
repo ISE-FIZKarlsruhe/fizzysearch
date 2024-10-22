@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, time
 from .fts import build_fts_index
 from .rdf2vec import build_rdf2vec_index
 from .bloomtyper import build_bloomtyper_index
@@ -15,6 +15,7 @@ if len(input_filepaths) == 0:
         f"No n-triple files found in the input directory: {input_filepath}\n"
     )
 else:
+    start_time = time.time()
     sys.stderr.write(f"Found {len(input_filepaths)} n-triple files\n")
 
 fts_sqlite_path = os.getenv("FTS_SQLITE_PATH")
@@ -34,3 +35,6 @@ if not fts_sqlite_path and not rdf2vec_index_path and not bloomtyper_index_path:
         "Please set either the FTS_SQLITE_PATH or RDF2VEC_INDEX_PATH environment variables to build an index\n"
     )
     sys.exit(1)
+else:
+    end_time = time.time()
+    sys.stderr.write(f"\nIndexing took {int(end_time - start_time)} seconds\n")
