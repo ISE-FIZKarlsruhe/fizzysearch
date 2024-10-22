@@ -19,7 +19,7 @@ def build_rdf2vec_index(triplefile_paths: list, rdf2vec_index_path: str):
     nodes = {}
     as_ints = []
     only_subjects = set()
-    for s, p, o in read_nt(triplefile_paths):
+    for s, p, o, _ in read_nt(triplefile_paths):
         s = s.strip("<>")
         p = p.strip("<>")
         o = o.strip("<>")  # and literals just remain as they are

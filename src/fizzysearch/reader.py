@@ -77,4 +77,4 @@ def read_nt(triplefile_paths: list):
             if not (p.startswith("<") and p.endswith(">")):
                 continue
 
-            yield s, p, o
+            yield s, p, o, triplefile_path

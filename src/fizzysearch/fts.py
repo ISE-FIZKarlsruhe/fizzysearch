@@ -37,7 +37,7 @@ def build_fts_index(
     db = get_db(index_db_path)
     logging.debug(f"Building FTS index with {triplefile_paths} in {index_db_path}")
 
-    for s, p, o in read_nt(triplefile_paths):
+    for s, p, o, _ in read_nt(triplefile_paths):
         # TODO - add support for blank nodes
         # How? We will need to back-reference any blanknodes to their referred subjects... :-(
 

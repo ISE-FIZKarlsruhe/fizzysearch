@@ -1,11 +1,11 @@
-import sqlite3
+import sqlite3, sys, time
 from typing import Union
 from rbloom import Bloom  # we want to use at least version 1.5.2
 from hashlib import sha256
 from .reader import read_nt
 
 DB_SCHEMA = """
-CREATE TABLE IF NOT EXISTS bloomtyper_index (predicate TEXT, bloom BLOB);
+CREATE TABLE IF NOT EXISTS bloomtyper_index (predicate TEXT, size INTEGER, bloom BLOB);
 """
 
 
@@ -30,9 +30,20 @@ def build_bloomtyper_index(
 ):
     db = get_db(index_db_path)
     the_map = {}
-    for s, p, o in read_nt(triplefile_paths):
+    count = 0
+    batch_interval = 30
+    start_time = time.time()
+    batch_time = start_time - (batch_interval * 2)
+    for s, p, o, triplefile_path in read_nt(triplefile_paths):
+        count += 1
         if p == "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>":
             the_map.setdefault(o.strip("<>"), set()).add(s.strip("<>"))
+            if time.time() - batch_time > batch_interval:
+                sys.stderr.write("\r" + " " * 80)
+                sys.stderr.write(
+                    f"\rFrom {triplefile_path} processed {count} triples in {int(time.time() - start_time)} seconds"
+                )
+                batch_time = time.time()
 
     for k, v in the_map.items():
         bf = Bloom(len(v), 0.005, hash_func)
@@ -41,16 +52,18 @@ def build_bloomtyper_index(
 
         outbuf = bf.save_bytes()
         db.execute(
-            "INSERT INTO bloomtyper_index (predicate, bloom) VALUES (?, ?)",
-            (k, outbuf),
+            "INSERT INTO bloomtyper_index (predicate, size, bloom) VALUES (?, ?, ?)",
+            (k, len(v), outbuf),
         )
     db.commit()
+    return count
 
 
 class Checker:
-    def __init__(self, db: str):
+    def __init__(self, db: str, only_predicates=[]):
         self.predicate_map = {}
         db = get_db(db)
+
         for predicate, bloom in db.execute(
             "SELECT predicate, bloom FROM bloomtyper_index"
         ):
