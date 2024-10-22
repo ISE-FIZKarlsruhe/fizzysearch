@@ -46,7 +46,7 @@ def build_bloomtyper_index(
                 batch_time = time.time()
 
     for k, v in the_map.items():
-        bf = Bloom(len(v), 0.005, hash_func)
+        bf = Bloom(len(v), 0.001, hash_func)
         for vv in v:
             bf.add(vv)
 
@@ -60,20 +60,41 @@ def build_bloomtyper_index(
 
 
 class Checker:
-    def __init__(self, db: str, only_predicates=[]):
+    def __init__(self, db: str):
         self.predicate_map = {}
-        db = get_db(db)
-
-        for predicate, bloom in db.execute(
-            "SELECT predicate, bloom FROM bloomtyper_index"
+        self.predicate_map_size = {}
+        self.db = get_db(db)
+        for pred, size in self.db.execute(
+            "SELECT predicate, size FROM bloomtyper_index"
         ):
-            self.predicate_map[predicate] = Bloom.load_bytes(bloom, hash_func)
+            self.predicate_map[pred] = False
+            self.predicate_map_size[pred] = size
 
-    def check(self, predicate, value):
-        if not predicate or not value:
-            return []
-        return [
-            predicate
-            for predicate, bloom in self.predicate_map.items()
-            if value in bloom
-        ]
+    def _fetch_from_db(self, predicate: str):
+        for pred, bloom in self.db.execute(
+            "SELECT predicate, bloom FROM bloomtyper_index WHERE predicate = ?",
+            (predicate,),
+        ):
+            self.predicate_map[pred] = Bloom.load_bytes(bloom, hash_func)
+            return self.predicate_map[pred]
+
+    def __call__(self, value, predicate=None):
+        if predicate is None:
+            return [pred for pred, _ in self if value in self[pred]]
+
+        if self.predicate_map.get(predicate, False) is False:
+            self._fetch_from_db(predicate)
+        pm = self.predicate_map.get(predicate, set())
+        return value in pm
+
+    def __iter__(self):
+        for pred in self.predicate_map:
+            yield pred, self.predicate_map_size[pred]
+
+    def __getitem__(self, predicate):
+        if self.predicate_map.get(predicate) == False:
+            return self._fetch_from_db(predicate)
+        return self.predicate_map.get(predicate, set())
+
+    def __contains__(self, predicate):
+        return predicate in self.predicate_map
