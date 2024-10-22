@@ -10,23 +10,6 @@ PARSER = Parser()
 PARSER.set_language(SPARQL)
 
 
-def literal_to_parts(literal: str):
-    literal_value = language = datatype = None
-    if literal.startswith('"'):
-        end_index = literal.rfind('"')
-        if end_index > 0:
-            literal_value = literal[1:end_index]
-            remainder = literal[end_index + 1 :].strip()
-            language = datatype = None
-            if remainder.startswith("@"):
-                language = remainder[1:]
-                datatype = None
-            elif remainder.startswith("^^"):
-                datatype = remainder[2:]
-                language = None
-    return literal_value, language, datatype
-
-
 def rewrite(query: str, predicate_map: dict = dict()) -> dict:
     """@var predicate_map is a dictionary keyed on properties that map to a callable that can be called to expand values for that property"""
 

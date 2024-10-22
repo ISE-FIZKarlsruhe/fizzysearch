@@ -1,11 +1,11 @@
 [tool.poetry]
 name = "fizzysearch"
-version = "0.22"
+version = "0.23"
 description = "A SPARQL rewriter that performs enhanced searches"
 authors = ["Etienne Posthumus <ep@epoz.org>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/ISE-FIZKarlsruhe/fizzysearch"
+homepage = "https://ise-fizkarlsruhe.github.io/fizzysearch/"
 repository = "https://github.com/ISE-FIZKarlsruhe/fizzysearch"
 keywords = ["SPARQL", "search", "RDF", "Linked Data"]
 

@@ -1,7 +1,6 @@
 import os, sys, gzip, sqlite3, logging, argparse
 from typing import Union
-from .rewriting import literal_to_parts
-from .reader import read_nt
+from .reader import read_nt, literal_to_parts
 
 
 DB_SCHEMA = """
