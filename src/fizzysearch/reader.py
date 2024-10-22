@@ -1,6 +1,23 @@
 import gzip, re
 
 
+def literal_to_parts(literal: str):
+    literal_value = language = datatype = None
+    if literal.startswith('"'):
+        end_index = literal.rfind('"')
+        if end_index > 0:
+            literal_value = literal[1:end_index]
+            remainder = literal[end_index + 1 :].strip()
+            language = datatype = None
+            if remainder.startswith("@"):
+                language = remainder[1:]
+                datatype = None
+            elif remainder.startswith("^^"):
+                datatype = remainder[2:]
+                language = None
+    return literal_value, language, datatype
+
+
 def decode_unicode_escapes(s):
     # See: https://www.w3.org/TR/n-triples/#grammar-production-UCHAR
     unicode_escape_pattern_u = re.compile(
