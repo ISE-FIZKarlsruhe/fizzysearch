@@ -73,7 +73,7 @@ BLOOMTYPER_INDEX_PATH=gnd.bloomtyper python3 -m fizzysearch
 This will take some time, as those are quite a number of triples. Once this process is complete we can use the generated index from Python like this:
 
 ```python
->>> from fizzysearch.bloommtyper import Checker
+>>> from fizzysearch.bloomtyper import Checker
 >>> c = Checker('gnd.bloomtyper')
 >>> c('https://d-nb.info/gnd/187-9')
 ['https://d-nb.info/standards/elementset/gnd#SeriesOfConferenceOrEvent']
