@@ -80,12 +80,16 @@ This will take some time, as those are quite a number of triples. Once this proc
 ```
 
 The generated bloomtyper index file is only circa 52MB in size, which is tiny - and fast to use - compared to the gigabytes of compressed triples it indexes.
+You can download a generated file from here: [https://nfdi.fiz-karlsruhe.de/gnd.bloomtyper](https://nfdi.fiz-karlsruhe.de/gnd.bloomtyper)
 
-We can also see the resulting map of types from the GND, and their counts:
+We can also see the resulting map of types from the GND, and their counts (as of October 2024):
 
 ```python
 for x, y in c:
     print(x,y)
+```
+
+```
 http://purl.org/ontology/bibo/Document 12513177
 https://d-nb.info/standards/elementset/gnd#DifferentiatedPerson 6146309
 http://purl.org/ontology/bibo/Article 2482466
