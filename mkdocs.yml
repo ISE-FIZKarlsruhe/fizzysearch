@@ -24,3 +24,13 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+nav:
+  - Introduction: index.md
+  - Getting Started: start.md
+  - Searching:
+      - Fulltext: fts.md
+      - RDF2vec: rdf2vec.md
+      - Semantic: semantic.md
+      - Images: imagesearch.md
+  - Bloomtyper: bloomtyper.md
+  - API Reference: api_reference.md
