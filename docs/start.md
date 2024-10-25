@@ -12,6 +12,25 @@ Create a Python virtual environment, and then issue the command:
 pip install fizzysearch
 ```
 
+Unfortunately, this is not the whole story...
+
+This works when only using the Bloomtyper functionality, but not when you would like to use the fill SPARQL rewriting for the various search systems.
+Until we have a more documentation, you can look at the [example Dockerfile](https://github.com/ISE-FIZKarlsruhe/fizzysearch/blob/main/Dockerfile)
+
+To build it, you can say:
+
+```shell
+docker build -t fizzysearch .
+```
+
+And then to run it, you could for example do something like:
+
+```shell
+docker run --rm -it -v $(PWD):/data -e FTS_SQLITE_PATH=/data/example.db -e INPUT_FILEPATH=/data/  fizzysearch
+```
+
+This will create a FTS index named example.db in your current directory, after looking for files to index from the directory that you ran the command in.
+
 ## Running the tests
 
 See the [test file](test_all.py) for some examples on how to build an index and run some test queries.
