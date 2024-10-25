@@ -1,4 +1,4 @@
-FROM python:3.9.7 AS builder
+FROM python:3.10-bullseye AS builder
 
 ENV PYTHONUNBUFFERED=True
 
@@ -17,7 +17,7 @@ RUN git clone https://github.com/epoz/tree-sitter-sparql
 RUN pip install tree-sitter==0.20.1
 RUN python -c "from tree_sitter import Language; Language.build_library('b/sparql.so', ['tree-sitter-sparql'])"
 
-FROM python:3.9.7
+FROM python:3.10-bullseye
 
 COPY --from=builder /fts5-snowball/fts5stemmer.so /usr/local/lib/
 COPY --from=builder /spellfix/spellfix.so /usr/local/lib/
@@ -25,7 +25,10 @@ COPY --from=builder /tree_sitter_sparql/b/sparql.so /usr/local/lib
 
 WORKDIR /src
 
-RUN pip install tree-sitter==0.20.1
-COPY fizzysearch.py .
+COPY ./src .
+COPY README.md .
+COPY pyproject.toml .
 
-ENTRYPOINT ["python", "fizzysearch.py"]
+RUN pip install .
+
+ENTRYPOINT ["python", "-m", "fizzysearch"]
