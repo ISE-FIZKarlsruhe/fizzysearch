@@ -8,7 +8,25 @@ class StringParamException(Exception):
     pass
 
 
-def build_rdf2vec_index(triplefile_paths: list, rdf2vec_index_path: str):
+def build_rdf2vec_index(
+    triplefile_paths: list, rdf2vec_index_path: str, triple_iterator=None
+):
+    if len(triplefile_paths) > 0:
+        logging.debug(
+            f"Building RDF2Vec index with {triplefile_paths} in {rdf2vec_index_path}"
+        )
+        iterator = read_nt(triplefile_paths)
+    elif triple_iterator:
+        logging.debug(
+            f"Building RDF2Vec index with a specified iterator in {rdf2vec_index_path}"
+        )
+        iterator = triple_iterator
+    else:
+        logging.error(
+            "No triples to index, neither triplefile_paths or triple_iterator given"
+        )
+        return
+
     # The imports are inside the building method so we can exclude these libraries at runtime
     # if we only want to use the index not build it.
     import igraph as ig
@@ -19,7 +37,7 @@ def build_rdf2vec_index(triplefile_paths: list, rdf2vec_index_path: str):
     nodes = {}
     as_ints = []
     only_subjects = set()
-    for s, p, o, _ in read_nt(triplefile_paths):
+    for s, p, o, _ in iterator:
         s = s.strip("<>")
         p = p.strip("<>")
         o = o.strip("<>")  # and literals just remain as they are
@@ -85,6 +103,7 @@ CREATE INDEX IF NOT EXISTS rdf2vec_index_uri ON rdf2vec_index (uri);
     DB.executemany("INSERT INTO rdf2vec_index VALUES (?, ?, ?)", to_insert)
     DB.commit()
     logging.debug(f"RDF2Vec mapping saved in {rdf2vec_index_path}.db")
+    return len(to_insert)
 
 
 def use_rdf2vec(rdf2vec_index: str, limit: int = 20):
