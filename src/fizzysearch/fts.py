@@ -1,6 +1,6 @@
 import os, sys, gzip, sqlite3, logging, argparse
 from typing import Union
-from .reader import read_nt, literal_to_parts
+from .reader import read_nt, literal_to_parts, decode_unicode_escapes
 
 
 DB_SCHEMA = """
@@ -32,12 +32,29 @@ class StringParamException(Exception):
 
 
 def build_fts_index(
-    triplefile_paths: list, index_db_path: Union[str, sqlite3.Connection]
+    triplefile_paths: list,
+    index_db_path: Union[str, sqlite3.Connection],
+    triple_iterator=None,
 ):
-    db = get_db(index_db_path)
-    logging.debug(f"Building FTS index with {triplefile_paths} in {index_db_path}")
 
-    for s, p, o, _ in read_nt(triplefile_paths):
+    if len(triplefile_paths) > 0:
+        logging.debug(f"Building FTS index with {triplefile_paths} in {index_db_path}")
+        iterator = read_nt(triplefile_paths)
+    elif triple_iterator:
+        logging.debug(
+            f"Building FTS index with a specified iterator in {index_db_path}"
+        )
+        iterator = triple_iterator
+    else:
+        logging.error(
+            "No triples to index, neither triplefile_paths or triple_iterator given"
+        )
+        return
+
+    db = get_db(index_db_path)
+
+    count = 0
+    for s, p, o, _ in iterator:
         # TODO - add support for blank nodes
         # How? We will need to back-reference any blanknodes to their referred subjects... :-(
 
@@ -48,8 +65,10 @@ def build_fts_index(
                 "INSERT INTO literal_index (subject, predicate, object, language, datatype) VALUES (?, ?, ?, ?, ?)",
                 (s, p, literal_value, language, datatype),
             )
+            count += 1
     db.commit()
-    logging.debug(f"Building FTS index done")
+    logging.debug(f"Building FTS index done, inserted {count} literals")
+    return count
 
 
 def use_fts(
@@ -83,8 +102,7 @@ def search_fts(
 
         back = []
         for subject, object, o_language, rank in db.execute(theq, params):
-            object = object.encode("utf8").decode("unicode_escape")
-            object = object.replace('"', '\\"').replace("\n", "\\n")
+            object = decode_unicode_escapes(object)
             if len(object) > 999:
                 object = object[:999] + "..."
             if o_language:
@@ -92,7 +110,7 @@ def search_fts(
                     (subject, f'"{object}"@{o_language}', f'"{rank}"^^xsd:decimal')
                 )
             else:
-                back.append((subject, f'"{object}"' f'"{rank}"^^xsd:decimal'))
+                back.append((subject, f'"{object}"', f'"{rank}"^^xsd:decimal'))
         return back
 
     try:
@@ -105,7 +123,7 @@ def search_fts(
             try:
                 return {
                     "results": doit(f'"{literal_value}"', language),
-                    "vars": (varname, varname + "Literal"),
+                    "vars": (varname, varname + "Literal", varname + "Rank"),
                 }
             except Exception as e:
                 logging.exception("Error in search_fts: " + literal)
