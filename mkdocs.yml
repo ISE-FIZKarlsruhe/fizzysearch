@@ -1,4 +1,6 @@
 site_name: Fizzysearch
+site_url: https://ise-fizkarlsruhe.github.io/fizzysearch/
+repo_url: https://github.com/ISE-FIZKarlsruhe/fizzysearch
 theme:
   name: material
   custom_dir: docs/overrides
