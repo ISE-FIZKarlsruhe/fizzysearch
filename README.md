@@ -1,5 +1,7 @@
 # FIZzysearch
 
+[Documentation](https://ise-fizkarlsruhe.github.io/fizzysearch/)
+
 ## A SPARQL rewriter that performs enhanced searches
 
 This is an extension of the work that was started at the [2023 HackaLOD](https://github.com/ISE-FIZKarlsruhe/hackaLOD23) event in Gouda.
