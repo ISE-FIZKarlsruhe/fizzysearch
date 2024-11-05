@@ -29,6 +29,8 @@ def build_rdf2vec_index(
 
     # The imports are inside the building method so we can exclude these libraries at runtime
     # if we only want to use the index not build it.
+    import multiprocessing
+    
     import igraph as ig
     import gensim
     import xxhash
@@ -77,7 +79,11 @@ def build_rdf2vec_index(
 
     logging.debug("RDF2Vec init: now training model")
     model = gensim.models.Word2Vec(
-        sentences=data, vector_size=100, window=5, min_count=1, workers=4
+        sentences=data,
+        vector_size=100,
+        window=5,
+        min_count=1,
+        workers=multiprocessing.cpu_count(),
     )
     vectors = []
     for node_id in only_subjects:
