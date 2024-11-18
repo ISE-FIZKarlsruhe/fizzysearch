@@ -16,7 +16,11 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
     result = {"query": query, "rewritten": query, "comments": []}
     tree = PARSER.parse(query.encode("utf8"))
 
-    # Call the comments listeners
+    result["query_type"] = None
+    for t in ("select", "construct", "ask", "describe"):
+        for m, m_name in SPARQL.query(f"({t}_query) @{t}_q").captures(tree.root_node):
+            result["query_type"] = t
+
     comment_q = SPARQL.query("(comment) @comment")
     for n, name in comment_q.captures(tree.root_node):
         result["comments"].append(n.text.decode("utf8").strip("# "))
