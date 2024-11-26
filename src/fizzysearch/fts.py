@@ -79,7 +79,29 @@ def use_fts(
     )
 
 
+def use_fts_stats(
+    fts_filepath: Union[str, sqlite3.Connection], use_language=False, limit=999
+):
+    return lambda varname, value: search_fts_stats(
+        fts_filepath, varname, value, use_language, limit
+    )
+
+
 def search_fts(
+    fts_index: Union[str, sqlite3.Connection],
+    varname: str,
+    literal: str,
+    use_language=False,
+    limit=999,
+):
+    results = search_fts_stats(fts_index, varname, literal, use_language, limit)
+    return {
+        "results": [(iri,) for iri, _, _ in results["results"]],
+        "vars": (varname,),
+    }
+
+
+def search_fts_stats(
     fts_index: Union[str, sqlite3.Connection],
     varname: str,
     literal: str,

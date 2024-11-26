@@ -79,14 +79,26 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
                             lline = " ".join(
                                 [l for l in line if not l.startswith("_:")]
                             )
-                            results.append(f"({lline})")
-                        results = (
-                            "VALUES ("
-                            + " ".join([var for var in output.get("vars", [])])
-                            + ")\n{"
-                            + "\n".join(results)
-                            + "\n}"
-                        )
+                            if len(line) > 1:
+                                results.append(f"({lline})")
+                            else:
+                                results.append(lline)
+                        vars = output.get("vars", [])
+                        if len(vars) > 1:
+                            results = (
+                                "VALUES ("
+                                + " ".join([var for var in vars])
+                                + ")\n{"
+                                + "\n".join(results)
+                                + "\n}"
+                            )
+                        else:
+                            results = (
+                                f"VALUES {vars[0]}"
+                                + " {\n"
+                                + "\n".join(results)
+                                + "\n}"
+                            )
                         for cc in results:
                             newq.append(cc)
                         i = end_byte
@@ -97,23 +109,3 @@ def rewrite(query: str, predicate_map: dict = dict()) -> dict:
         result["rewritten"] = newq
 
     return result
-
-
-if __name__ == "__main__":
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument(
-        "fts_sqlite_path",
-        help="The path to the sqlite file that will be created with the FTS data",
-    )
-    argparser.add_argument(
-        "triplefiles",
-        help="The path to scan for n-triple files to index",
-    )
-    args = argparser.parse_args()
-
-    filenames = [
-        os.path.join(args.triplefiles, filename)
-        for filename in os.listdir(args.triplefiles)
-        if filename.endswith(".nt") or filename.endswith(".nt.gz")
-    ]
-    build_fts_index(filenames, args.fts_sqlite_path)
