@@ -2,6 +2,17 @@ import os, sys, time
 from .fts import build_fts_index
 from .rdf2vec import build_rdf2vec_index
 from .bloomtyper import build_bloomtyper_index
+import logging
+
+log = logging.getLogger("fizzysearch")
+handler = logging.StreamHandler()
+log.addHandler(handler)
+log.setLevel(logging.DEBUG)
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter(
+    "%(levelname)-9s %(name)s %(asctime)s %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+)
+handler.setFormatter(formatter)
 
 input_filepath = os.getenv("INPUT_FILEPATH", ".")
 
@@ -20,7 +31,10 @@ else:
 
 fts_sqlite_path = os.getenv("FTS_SQLITE_PATH")
 if fts_sqlite_path:
-    build_fts_index(input_filepaths, fts_sqlite_path)
+    sys.stderr.write(
+        "Generating a FTS index dirfectly in Fizzysearch is not supported any more. This is now handled by bikidata\n"
+    )
+    sys.exit(1)
 
 rdf2vec_index_path = os.getenv("RDF2VEC_INDEX_PATH")
 if rdf2vec_index_path:
@@ -30,9 +44,8 @@ bloomtyper_index_path = os.getenv("BLOOMTYPER_INDEX_PATH")
 if bloomtyper_index_path:
     build_bloomtyper_index(input_filepaths, bloomtyper_index_path)
 
-if not fts_sqlite_path and not rdf2vec_index_path and not bloomtyper_index_path:
     sys.stderr.write(
-        "Please set either the FTS_SQLITE_PATH or RDF2VEC_INDEX_PATH environment variables to build an index\n"
+        "Please set either the RDF2VEC_INDEX_PATH or BLOOMTYPER_INDEX_PATH or environment variables to build an index\n"
     )
     sys.exit(1)
 else:

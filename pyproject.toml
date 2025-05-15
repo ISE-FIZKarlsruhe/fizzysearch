@@ -1,26 +1,18 @@
-[tool.poetry]
+[project]
 name = "fizzysearch"
-version = "0.28"
+version = "0.29"
 description = "A SPARQL rewriter that performs enhanced searches"
-authors = ["Etienne Posthumus <ep@epoz.org>"]
 license = "MIT"
 readme = "README.md"
+
+requires-python = ">=3.10"
+dependencies = [
+    "rbloom==1.5.2",
+    "tree-sitter==0.20.1",
+]
+
+[tool.poetry]
+author = "Etienne Posthumus <ep@epoz.org>"
 homepage = "https://ise-fizkarlsruhe.github.io/fizzysearch/"
 repository = "https://github.com/ISE-FIZKarlsruhe/fizzysearch"
 keywords = ["SPARQL", "search", "RDF", "Linked Data"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-tree-sitter = "0.20.1"
-igraph = "0.10.4"
-numpy = "1.26.4"
-voyager = "2.0.6"
-gensim = "4.3.2"
-scipy = "1.10.1"
-xxhash = "3.4.1"
-rbloom = "1.5.2"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
